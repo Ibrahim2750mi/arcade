@@ -464,3 +464,44 @@ class UIGridLayout(UILayout):
                         child.rect = new_rect
 
             start_y -= max_height_row
+
+
+class UIFIleLayout(UIGridLayout):
+    """
+    FIle chooser(dialogue).
+
+    :param: path: 
+    """
+    def __init__(self, path: Optional[PosixPath, WindowsPath]=Path.cwd(),
+                 file_type: str=".*",
+                 x: float = 0,
+                 y: float = 0,
+                 width: float = 500,
+                 height: float = 500,
+                 size_hint=(1, 1),
+                 size_hint_min=None,
+                 size_hint_max=None,
+                 style=None, **kwargs):
+
+        super().__init__(
+                x=x,
+                y=y,
+                width=0,
+                height=0,
+                children=tuple(),
+                size_hint=size_hint,
+                size_hint_min=size_hint_min,
+                size_hint_max=size_hint_max,
+                style=style,
+                column_count = 3,
+                row_count = 1,
+                horizontal_spacing = 30,
+                vertical_spacing = 10,
+                **kwargs)
+
+        for row_index, file in enumerate(path.iterdir()):
+            self.row_count = row_index + 1
+            self.add(UILabel(file.name, width=150, height=40), 2, row_index)
+
+        self.quick_places = [Path.home(), ]
+        
