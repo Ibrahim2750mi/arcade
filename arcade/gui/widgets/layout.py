@@ -1,5 +1,7 @@
 from typing import Iterable, TypeVar, Tuple
 
+from arcade import load_texture
+from arcade.gui.events import UIOnClickEvent
 from arcade.gui.property import bind
 from arcade.gui.widgets import UIWidget, UILayout
 
@@ -376,6 +378,7 @@ class UIGridLayout(UILayout):
 
     def do_layout(self):
         initial_left_x = self.content_rect.left
+        print(initial_left_x)
         start_y = self.content_rect.top
 
         if not self.children:
@@ -472,7 +475,7 @@ class UIFIleLayout(UIGridLayout):
 
     :param: path: 
     """
-    def __init__(self, path: Optional[PosixPath, WindowsPath]=Path.cwd(),
+    def __init__(self, path: Union[PosixPath, WindowsPath]=Path.cwd(),
                  file_type: str=".*",
                  x: float = 0,
                  y: float = 0,
@@ -486,22 +489,35 @@ class UIFIleLayout(UIGridLayout):
         super().__init__(
                 x=x,
                 y=y,
-                width=0,
-                height=0,
                 children=tuple(),
                 size_hint=size_hint,
                 size_hint_min=size_hint_min,
                 size_hint_max=size_hint_max,
                 style=style,
-                column_count = 3,
+                column_count = 1,
                 row_count = 1,
                 horizontal_spacing = 30,
                 vertical_spacing = 10,
                 **kwargs)
 
-        for row_index, file in enumerate(path.iterdir()):
-            self.row_count = row_index + 1
-            self.add(UILabel(file.name, width=150, height=40), 2, row_index)
-
+        
+        self.path = path
+        self.setup()
         self.quick_places = [Path.home(), ]
+
+    def _expand_dir(self, _: UIOnClickEvent, file_dir: Union[PosixPath, WindowsPath]):
+        if file_dir.is_file():
+            return
+        self.clear()
+        self.path = file_dir
+        self.setup()
+
+    def setup(self):
+        tex = load_texture(file_name=":resources:gui_basic_assets/icons/file_not_selected.png")
+        for row_index, file in enumerate(self.path.iterdir()):
+            if row_index >= self.row_count:
+                self.row_count += 1
+            file_button = UITextureButton(texture=tex, width=250, height=40, text=file.name, style={"font_color": (0, 0, 0)})
+            file_button.on_click = partial(self._expand_dir, file_dir=file)
+            self.add(file_button, 0, row_index)
         
