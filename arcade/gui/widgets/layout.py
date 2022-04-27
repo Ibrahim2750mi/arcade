@@ -486,6 +486,8 @@ class UIFIleLayout(UIGridLayout):
                  callback: Callable=None,
                  style=None, **kwargs):
 
+
+
         super().__init__(
                 x=x,
                 y=y,
@@ -494,22 +496,25 @@ class UIFIleLayout(UIGridLayout):
                 size_hint_min=size_hint_min,
                 size_hint_max=size_hint_max,
                 style=style,
-                column_count = 1,
+                column_count = 2,
                 row_count = 2,
-                horizontal_spacing = 30,
+                horizontal_spacing = 50,
                 vertical_spacing = 10,
                 **kwargs)
-        
+
         self._path = path
         self._callback = callback
 
-        select_button = UIFlatButton(text="SELECT")
+        self._bg_tex = load_texture(file_name=":resources:gui_basic_assets/window/file_chooser.png")
+
+        self.with_background(texture=self._bg_tex)
+
+        select_button = UIFlatButton(text="SELECT", width=100)
         select_button.on_click = self._select
-        self.add(select_button, 0, 0)
+        self.add(select_button, 1, 0)
         self.quick_places = [Path.home(), ]
 
         self.setup()
-        
         self.selected = False
 
     def _expand_dir(self, _: UIOnClickEvent, file_dir: Union[PosixPath, WindowsPath]):
