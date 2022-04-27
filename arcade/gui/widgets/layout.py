@@ -378,7 +378,6 @@ class UIGridLayout(UILayout):
 
     def do_layout(self):
         initial_left_x = self.content_rect.left
-        print(initial_left_x)
         start_y = self.content_rect.top
 
         if not self.children:
@@ -484,6 +483,7 @@ class UIFIleLayout(UIGridLayout):
                  size_hint=(1, 1),
                  size_hint_min=None,
                  size_hint_max=None,
+                 callback: Callable=None,
                  style=None, **kwargs):
 
         super().__init__(
@@ -495,29 +495,50 @@ class UIFIleLayout(UIGridLayout):
                 size_hint_max=size_hint_max,
                 style=style,
                 column_count = 1,
-                row_count = 1,
+                row_count = 2,
                 horizontal_spacing = 30,
                 vertical_spacing = 10,
                 **kwargs)
-
         
-        self.path = path
-        self.setup()
+        self._path = path
+        self._callback = callback
+
+        select_button = UIFlatButton(text="SELECT")
+        select_button.on_click = self._select
+        self.add(select_button, 0, 0)
         self.quick_places = [Path.home(), ]
 
+        self.setup()
+        
+        self.selected = False
+
     def _expand_dir(self, _: UIOnClickEvent, file_dir: Union[PosixPath, WindowsPath]):
+        self._path = file_dir
         if file_dir.is_file():
             return
         self.clear()
-        self.path = file_dir
         self.setup()
+
+    def _select(self, _: UIOnClickEvent):
+        if self._path.is_dir():
+            return
+
+        self.selected = True
+        self.parent.remove(self)
+        if self._callback is not None:
+            self._callback(self._path)
 
     def setup(self):
         tex = load_texture(file_name=":resources:gui_basic_assets/icons/file_not_selected.png")
-        for row_index, file in enumerate(self.path.iterdir()):
-            if row_index >= self.row_count:
+        for row_index, file in enumerate(self._path.iterdir()):
+            if row_index >= self.row_count - 1:
                 self.row_count += 1
             file_button = UITextureButton(texture=tex, width=250, height=40, text=file.name, style={"font_color": (0, 0, 0)})
             file_button.on_click = partial(self._expand_dir, file_dir=file)
-            self.add(file_button, 0, row_index)
-        
+            self.add(file_button, 0, row_index + 1)
+    
+    @property
+    def path(self):
+        if self.selected:
+            return self._path
+        return False
