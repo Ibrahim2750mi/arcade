@@ -467,83 +467,15 @@ class UIGridLayout(UILayout):
 
             start_y -= max_height_row
 
+                    if self.align_horizontal == "left":
+                        new_rect = new_rect.align_left(start_x - max_width)
+                    elif self.align_horizontal == "right":
+                        new_rect = new_rect.align_right(start_x)
+                    else:
+                        new_rect = new_rect.align_center_x(center_x)
 
-class UIFIleLayout(UIGridLayout):
-    """
-    FIle chooser(dialogue).
+                    if new_rect != child.rect:
+                        child.rect = new_rect
+                
 
-    :param: path: 
-    """
-    def __init__(self, path: Union[PosixPath, WindowsPath]=Path.cwd(),
-                 file_type: str=".*",
-                 x: float = 0,
-                 y: float = 0,
-                 width: float = 500,
-                 height: float = 500,
-                 size_hint=(1, 1),
-                 size_hint_min=None,
-                 size_hint_max=None,
-                 callback: Callable=None,
-                 style=None, **kwargs):
-
-
-
-        super().__init__(
-                x=x,
-                y=y,
-                children=tuple(),
-                size_hint=size_hint,
-                size_hint_min=size_hint_min,
-                size_hint_max=size_hint_max,
-                style=style,
-                column_count = 2,
-                row_count = 2,
-                horizontal_spacing = 50,
-                vertical_spacing = 10,
-                **kwargs)
-
-        self._path = path
-        self._callback = callback
-
-        self._bg_tex = load_texture(file_name=":resources:gui_basic_assets/window/file_chooser.png")
-
-        self.with_background(texture=self._bg_tex)
-
-        select_button = UIFlatButton(text="SELECT", width=100)
-        select_button.on_click = self._select
-        self.add(select_button, 1, 0)
-        self.quick_places = [Path.home(), ]
-
-        self.setup()
-        self.selected = False
-
-    def _expand_dir(self, _: UIOnClickEvent, file_dir: Union[PosixPath, WindowsPath]):
-        self._path = file_dir
-        if file_dir.is_file():
-            return
-        self.clear()
-        self.setup()
-
-    def _select(self, _: UIOnClickEvent):
-        if self._path.is_dir():
-            return
-
-        self.selected = True
-        self.parent.remove(self)
-        if self._callback is not None:
-            self._callback(self._path)
-
-    def setup(self):
-        tex = load_texture(file_name=":resources:gui_basic_assets/icons/file_not_selected.png")
-        for row_index, file in enumerate(self._path.iterdir()):
-            if row_index >= self.row_count - 1:
-                self.row_count += 1
-            file_button = UITextureButton(texture=tex, width=250, height=40, text=file.name, style={"font_color": (0, 0, 0)})
-            file_button.on_click = partial(self._expand_dir, file_dir=file)
-            self.add(file_button, 0, row_index + 1)
-    
-    @property
-    def path(self):
-        if self.selected:
-            return self._path
-        return False
+            start_y -= max_height
