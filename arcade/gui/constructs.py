@@ -106,7 +106,7 @@ class UIFIleChooser(UIGridLayout):
                 size_hint_min=size_hint_min,
                 size_hint_max=size_hint_max,
                 style=style,
-                column_count = 4,
+                column_count = 6,
                 row_count = 2,
                 horizontal_spacing = 0.2*width - 100,
                 vertical_spacing = 10,
@@ -121,11 +121,11 @@ class UIFIleChooser(UIGridLayout):
 
         self.select_button = UIFlatButton(text="SELECT", width=width*0.15)
         self.select_button.on_click = self._select
-        self.add(self.select_button, 3, 0)
+        self.add(self.select_button, 5, 0)
 
         # quick places
-        quick_place_label = UILabel(text="Quick Places")
-        home_button = UIFlatButton(text="Home")
+        quick_place_label = UILabel(text="Quick Places", size_hint=(size_hint[0]/5, 1))
+        home_button = UIFlatButton(text="Home", size_hint=(size_hint[0]/5, 1))
         home_button.on_click = partial(self._expand_dir, file_dir=Path.home())
 
         self.add(quick_place_label, 0, 0)
@@ -138,16 +138,16 @@ class UIFIleChooser(UIGridLayout):
 
         self.setup()
         self.selected = False
+        print(self.size_hint_min)
 
     def _expand_dir(self, _: UIOnClickEvent, file_dir: Union[PosixPath, WindowsPath]):
         self._path = file_dir
-        print(file_dir)
         if file_dir.is_file():
             return
         self.clear()
-        self.add(self.select_button, 2, 0)
+        self.add(self.select_button, 5, 0)
         for i in range(2):
-            self.add(self._quick_place_widgets[i], 0, i)
+            self.add(self._quick_place_widgets[i], 0)
 
         self.setup()
 
@@ -168,7 +168,7 @@ class UIFIleChooser(UIGridLayout):
         reshaped_dir = [[] for _ in range(reshape_size)]
         file_index = 0
         # reshaping the iterated dir
-        for file in self._path.iterdir():
+        for file in sorted(self._path.iterdir()):
             if len(reshaped_dir[file_index]) >= self.height_ // (40 + 10):
                 file_index += 1
             reshaped_dir[file_index].append(file)

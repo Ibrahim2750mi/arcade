@@ -1,7 +1,5 @@
 from typing import Iterable, TypeVar, Tuple
 
-from arcade import load_texture
-from arcade.gui.events import UIOnClickEvent
 from arcade.gui.property import bind
 from arcade.gui.widgets import UIWidget, UILayout
 
@@ -431,13 +429,16 @@ class UIGridLayout(UILayout):
                 max_height = max_height_per_row[row_num][col_num][0] + self._vertical_spacing
                 max_width = max_width_per_column[col_num][row_num][0] + self._horizontal_spacing
 
-                if max_width == self._horizontal_spacing:
+                col_span = max_width_per_column[col_num][row_num][1]
+                row_span = max_height_per_row[row_num][col_num][1]
+
+                if max_width == self._horizontal_spacing and col_span == 0:
                     max_width = 0
-                if max_height == self._vertical_spacing:
+                if max_height == self._vertical_spacing and row_span == 0:
                     max_height = 0
 
-                col_span = max_width_per_column[col_num][row_num][1] or 1
-                row_span = max_height_per_row[row_num][col_num][1] or 1
+                col_span = col_span or 1
+                row_span = row_span or 1
 
                 center_y = start_y - (max_height / 2)
                 center_x = start_x + (max_width / 2)
@@ -466,16 +467,4 @@ class UIGridLayout(UILayout):
                         child.rect = new_rect
 
             start_y -= max_height_row
-
-                    if self.align_horizontal == "left":
-                        new_rect = new_rect.align_left(start_x - max_width)
-                    elif self.align_horizontal == "right":
-                        new_rect = new_rect.align_right(start_x)
-                    else:
-                        new_rect = new_rect.align_center_x(center_x)
-
-                    if new_rect != child.rect:
-                        child.rect = new_rect
-                
-
-            start_y -= max_height
+            
