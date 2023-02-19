@@ -36,6 +36,7 @@ from arcade.gui.widgets.dropdown import UIDropdown
 from arcade.gui.widgets import UISpriteWidget
 from arcade.gui.widgets.buttons import UITextureButton, UIFlatButton
 from arcade.gui.widgets.slider import UISlider
+from arcade.gui.widgets import UIScrollArea
 from arcade.gui.widgets import UIWidget
 from arcade.gui.widgets import UIWidgetParent
 from arcade.gui.property import ListProperty, DictProperty, Property, bind
@@ -74,6 +75,7 @@ __all__ = [
     "UIOnActionEvent",
     "UIOnChangeEvent",
     "UIOnClickEvent",
+    "UIScrollArea",
     "UISlider",
     "UIStyleBase",
     "UIStyledWidget",

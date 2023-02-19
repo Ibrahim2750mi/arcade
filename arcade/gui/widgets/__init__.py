@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from functools import partial
 from random import randint
 from typing import (
     NamedTuple,
@@ -20,6 +21,8 @@ from arcade.types import Color
 from arcade.color import TRANSPARENT_BLACK
 from arcade.gui.events import (
     UIEvent,
+    UIKeyPressEvent,
+    UIKeyReleaseEvent,
     UIMouseMovementEvent,
     UIMousePressEvent,
     UIMouseReleaseEvent,
@@ -920,3 +923,143 @@ class UISpace(UIWidget):
     def do_render(self, surface: Surface):
         self.prepare_render(surface)
         surface.clear(self._color)
+
+
+class UIScrollArea(UIWidget):
+    def __init__(
+        self,
+        *,
+        x=0,
+        y=0,
+        width=200,
+        height=200,
+        pixels_scroll=5,
+        children=None,
+        size_hint=None,
+        size_hint_min=None,
+        size_hint_max=None,
+        **kwargs,
+    ):
+        super().__init__(
+            x=x,
+            y=y,
+            width=width,
+            height=height,
+            children=children,
+            size_hint=size_hint,
+            size_hint_min=size_hint_min,
+            size_hint_max=size_hint_max,
+            **kwargs
+        )
+
+        self.pixels_scroll = pixels_scroll
+        self.focused = False
+
+        self._canvas_x = 0
+        self._canvas_y = 0
+
+        self.change_x = 0
+        self.change_y = 0
+
+    @property
+    def canvas_x(self):
+        return self._canvas_x
+
+    @property
+    def canvas_y(self):
+        return self._canvas_y
+
+    def to_canvas_x(self, x):
+        return x - self.x
+
+    def to_canvas_y(self, y):
+        return y - self.y
+    
+    def _adjust_child(self, child):
+        child_cx = self.to_canvas_x(child.x)
+        child_cy = self.to_canvas_y(child.y)
+
+        new_width = child.width
+        new_height = child.height
+
+        if self.canvas_x > child_cx:
+            new_width = child.width - (self.canvas_x - child_cx)
+        if self.canvas_x + self.content_width < child_cx + child.width:
+            new_width = child.width - (child_cx + child.width - self.canvas_x - self.content_width) \
+             + self._border_width + self._padding_left
+        if new_width > child.width:
+            new_width = child.width
+        if new_width < 0:
+            new_width = 0
+
+        if self.canvas_y > child_cy:
+            new_height = child.height - (self.canvas_y - child_cy)
+        if self.canvas_y + self.content_height < child_cy + child.height:
+            new_height = child.height - (child_cy + child.height - self.canvas_y - self.content_height) \
+             + self._border_width + self._padding_bottom
+        if new_height > child.height:
+            new_height = child.height
+        if new_height < 0:
+            new_height = 0
+
+        new_x = child.x - self.canvas_x
+        if new_x < self.x + self._border_width + self._padding_left:
+            new_x = self.x + self._border_width + self._padding_left
+        if new_x > self.x + self.content_width:
+            new_x = self.x + self.content_width
+
+        new_y = child.y - self.canvas_y
+        if new_y < self.y + self._border_width + self._padding_bottom:
+            new_y = self.y + self._border_width + self._padding_bottom
+        if new_y > self.y + self.content_height:
+            new_y = self.y + self.content_height
+
+        return (new_x, new_y, new_width, new_height)
+
+    def _child_prepare_render(self, surface: Surface, rect):
+        surface.limit(*rect)
+
+    def prepare_render(self, surface: Surface):
+        super().prepare_render(surface)
+        for child in self.children:
+            child.prepare_render = partial(self._child_prepare_render, rect=self._adjust_child(child))
+
+    def do_render(self, surface: Surface):
+        self.prepare_render(surface)
+        surface.clear()
+
+    def on_update(self, dt):
+        self._canvas_x += self.change_x
+        self._canvas_y += self.change_y
+        self.trigger_render()
+
+    def on_event(self, event: UIEvent):
+        if isinstance(event, UIKeyPressEvent) and self.focused:
+            key = event.symbol
+            if key == arcade.key.UP:
+                self.change_y = self.pixels_scroll
+            elif key == arcade.key.DOWN:
+                self.change_y = -self.pixels_scroll
+            elif key == arcade.key.LEFT:
+                self.change_x = -self.pixels_scroll
+            elif key == arcade.key.RIGHT:
+                self.change_x = self.pixels_scroll
+
+        if isinstance(event, UIKeyReleaseEvent) and self.focused:
+            key = event.symbol
+            if key == arcade.key.UP or key == arcade.key.DOWN:
+                self.change_y = 0
+            elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+                self.change_x = 0
+
+
+        if isinstance(event, UIMousePressEvent):
+            if event.x > self.x and event.x < self.x + self.content_width:
+                if event.y > self.y and event.y < self.y + self.content_height:
+                    self.focused = True
+                else:
+                    self.focused = False
+            else:
+                self.focused = False
+
+        return EVENT_UNHANDLED
