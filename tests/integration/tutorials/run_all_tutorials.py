@@ -32,9 +32,9 @@ def run_tutorials(indices_in_range = None, index_skip_list = None):
         tutorials.sort()
         print(f"Found {len(tutorials)} tutorials in {tutorial_subdir}")
 
-        file_path = os.path.dirname(os.path.abspath(__file__))
-        print(file_path)
-        os.chdir(file_path+"/../..")
+        # file_path = os.path.dirname(os.path.abspath(__file__))
+        print(tutorial_subdir)
+        os.chdir(tutorial_subdir)
         continue
         # run tutorials
         for (idx, tutorial) in enumerate(tutorials):
