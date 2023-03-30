@@ -21,7 +21,7 @@ def _get_tutorials(start_path):
     tutorials = [_get_short_name(e) for e in tutorials]
     tutorials = [e for e in tutorials if e != "run_all_tutorials"]
     tutorials = [e for e in tutorials if not e.startswith('_')]
-    tutorials = [f"doc.tutorials.{start_path.name}." + e for e in tutorials if not e.startswith('_')]
+    tutorials = [e for e in tutorials if not e.startswith('_')]
     return tutorials
 
 def run_tutorials(indices_in_range = None, index_skip_list = None):
@@ -31,7 +31,8 @@ def run_tutorials(indices_in_range = None, index_skip_list = None):
         tutorials = _get_tutorials(tutorial_subdir)
         tutorials.sort()
         print(f"Found {len(tutorials)} tutorials in {tutorial_subdir}")
-
+        if len(tutorials) == 0:
+            continue
         # file_path = os.path.dirname(os.path.abspath(__file__))
         print(tutorial_subdir)
         os.chdir(tutorial_subdir)
