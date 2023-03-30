@@ -1,7 +1,7 @@
 Welcome to The Arcade Library!
 ==============================
 
-Arcade is an easy-to-learn Python library for creating 2D video games.
+Arcade is an easy-to-learn Python library for creating 2D video game.
 It is ideal for beginning programmers, or programmers who want to create
 2D games without learning a complex framework.
 

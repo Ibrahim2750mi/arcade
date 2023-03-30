@@ -2,7 +2,7 @@ from pathlib import Path
 import arcade
 from arcade.experimental import BloomFilter
 import random
-from arcade.color import *
+from arcade.color import RED, YELLOW, ORANGE, GREEN, BLUEBERRY, AMETHYST
 
 
 # Do the math to figure out our screen dimensions
@@ -28,7 +28,7 @@ class MyGame(arcade.Window):
 
         for y in range(10, self.height, 50):
             color = random.choice([RED, YELLOW, ORANGE, GREEN, BLUEBERRY, AMETHYST])
-            my_sprite = arcade.SpriteCircle(random.randrange(40), color)
+            my_sprite = arcade.SpriteCircle(random.randrange(1, 40), color)
             self.sprite_list.append(my_sprite)
             my_sprite.change_x = random.random() * 5
             my_sprite.center_y = y
