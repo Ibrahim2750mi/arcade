@@ -26,7 +26,8 @@ def _get_tutorials(start_path):
 
 def run_tutorials(indices_in_range = None, index_skip_list = None):
     """Run all tutorials in the doc/tutorials directory"""
-    for tutorial_subdir in [path for path in list(Path(__file__).joinpath(TUTORIAL_SUBDIR).iterdir()) if path.is_dir()]:
+    file_path = Path(__file__).parent
+    for tutorial_subdir in [path for path in list((file_path / TUTORIAL_SUBDIR).iterdir()) if path.is_dir()]:
         tutorials = _get_tutorials(tutorial_subdir)
         tutorials.sort()
         print(f"Found {len(tutorials)} tutorials in {tutorial_subdir}")
